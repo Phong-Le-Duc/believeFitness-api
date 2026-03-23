@@ -16,6 +16,7 @@ async function createSingleUser(req, res, next) {
 	try {
 		let user = await User.create({
 			username: req.fields.username,
+			userFirstName: req.fields.userFirstName,
 			password: hashSync(req.fields.password, 15),
 			role: "default"
 		});
