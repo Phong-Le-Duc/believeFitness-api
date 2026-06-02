@@ -1,7 +1,13 @@
 var { Sequelize } = require("sequelize");
+var { dirname } = require("path");
+var { mkdirSync } = require("fs");
+
+var storage = process.env.SQLITE_STORAGE || "./storage/database.sqlite3";
+mkdirSync(dirname(storage), { recursive: true });
+
 var sequelize = new Sequelize({
 	dialect: "sqlite",
-	storage: "./storage/database.sqlite3",
+	storage,
 	logging: false
 });
 
