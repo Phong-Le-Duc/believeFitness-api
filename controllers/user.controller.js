@@ -1,5 +1,7 @@
 var { User, Class } = require("../models/models");
-var { hashSync } = require("bcryptjs");
+var { hash } = require("bcryptjs");
+
+var PASSWORD_SALT_ROUNDS = 10;
 
 async function getSingleUser(req, res, next) {
 	try {
@@ -14,10 +16,11 @@ async function getSingleUser(req, res, next) {
 
 async function createSingleUser(req, res, next) {
 	try {
+		let password = await hash(req.fields.password, PASSWORD_SALT_ROUNDS);
 		let user = await User.create({
 			username: req.fields.username,
 			userFirstName: req.fields.userFirstName,
-			password: hashSync(req.fields.password, 15),
+			password,
 			role: "default"
 		});
 		res.json(user);

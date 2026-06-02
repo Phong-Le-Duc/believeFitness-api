@@ -1,6 +1,13 @@
 var { User } = require("../models/models");
-var { compareSync } = require("bcryptjs");
+var { compare, hash } = require("bcryptjs");
 var { sign } = require("jsonwebtoken");
+
+var PASSWORD_SALT_ROUNDS = 10;
+
+function getHashRounds(passwordHash) {
+	let parts = passwordHash.split("$");
+	return parseInt(parts[2], 10);
+}
 
 async function createToken(req, res, next) {
 	try {
@@ -8,8 +15,13 @@ async function createToken(req, res, next) {
 
 		if (!user) return res.status(401).end();
 
-		if (!compareSync(req.fields.password, user.password))
+		if (!await compare(req.fields.password, user.password))
 			return res.status(401).end();
+
+		if (getHashRounds(user.password) > PASSWORD_SALT_ROUNDS) {
+			let updatedPassword = await hash(req.fields.password, PASSWORD_SALT_ROUNDS);
+			await user.update({ password: updatedPassword });
+		}
 
 		let token = sign({
 			data: user
